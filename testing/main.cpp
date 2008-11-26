@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <time.h>
+#include <unistd.h>
 
 void circle(SDL_Surface *screen, int x, int y, int r, Uint32 color)
 {
@@ -33,8 +34,9 @@ void circle(SDL_Surface *screen, int x, int y, int r, Uint32 color)
 int main(int argc, char ** argv) {
 	SDL_Surface *screen;
 	bool running=true;
-	int height=900;
-	int width=900;
+	int height=800;
+	int width=600;
+	char c;
 	int lastframe=0, curframe=0,frametime=0;
 	unsigned long int ticker = 1,fticker=1;
 	srand ( time(NULL) );
@@ -48,6 +50,18 @@ int main(int argc, char ** argv) {
 	srand ( time(NULL) );
 	Uint32 g_Black,g_red;
 	
+	/* parse our width, height options */
+	while ((c = getopt(argc, argv, "w:h:")) != -1) {
+		switch (c) {
+		case 'w':
+			width = atoi(optarg);
+			break;
+		case 'h':
+			height = atoi(optarg);
+			break;
+		}
+	}
+
 	Cgravenv psim;
 	Ccamera cam(&psim);
 	Cclusterbuild cluster(&psim);
@@ -56,6 +70,7 @@ int main(int argc, char ** argv) {
 	cam.setMode(Ccamera::Tmodes(0));
 	
 	/*for(int i=0;i<4;++i) {
+ *
 		std::cerr<<i;
 		cluster.addCluster(	rand() % 5+10,
 							rand() % 2+2,
