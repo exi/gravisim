@@ -14,8 +14,11 @@ gravenv.o:
 planet.o:
 	g++ ${FLAGS} -Wall planet.cpp -c
 
-grav: camera.o gravenv.o planet.o 
-	g++ ${FLAGS} -Wall ${LIBS} camera.o planet.o gravenv.o main.cpp -o grav
+main.o:
+	g++ ${FLAGS} -Wall main.cpp -c
+
+grav: camera.o gravenv.o planet.o main.o
+	g++ ${FLAGS} -Wall ${LIBS} camera.o planet.o gravenv.o main.o -o grav
 
 clean:
 	rm *.o grav || exit 0
