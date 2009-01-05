@@ -1,5 +1,5 @@
 LIBS =  `sdl-config --libs` -lpthread
-FLAGS = `sdl-config --cflags` -D CORECOUNT=2 -O2 -mtune=k8
+FLAGS = `sdl-config --cflags` -D CORECOUNT=2 -O2
 all: grav
 
 camera.o:

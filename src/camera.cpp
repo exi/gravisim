@@ -47,8 +47,10 @@ void Ccamera::transformCoords() {
 	double nheight = height / 2;
 	double nwidth = width / 2;
 	
-	wx = std::pair<double,double>((tx - nheight),(tx + nheight));
-	wy = std::pair<double,double>((ty - nwidth),(ty + nwidth));	
+	/*wx = std::pair<double,double>((tx - nheight),(tx + nheight));
+	wy = std::pair<double,double>((ty - nwidth),(ty + nwidth));*/
+	wx = std::pair<double,double>((tx - nwidth),(tx + nwidth));
+	wy = std::pair<double,double>((ty - nheight),(ty + nheight));	
 		 
 	resized=false;
 	

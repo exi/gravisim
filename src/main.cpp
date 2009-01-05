@@ -94,7 +94,7 @@ int main(int argc, char ** argv) {
 		exit(1);
 	}
 	
-	screen = SDL_SetVideoMode(height, width, 0, 0);
+	screen = SDL_SetVideoMode(width,height, 0, 0);
 	if (!screen) {
 		fprintf(stderr, "Konnte Bildschirmmodus nicht setzen: %s\n",SDL_GetError());
 		exit(1);
@@ -225,7 +225,7 @@ int main(int argc, char ** argv) {
 							rand() % 2000000 +1);
 		}
 		if(ticker % 10 == 0)
-			std::cerr<<"\r "<<ftsquare<<" ms / frame, "<<psim.size()<<" objects--------------";
+			std::cerr<<"\r "<<1000.0/ftsquare<<" fps, "<<psim.size()<<" objects--------------";
 		for(int i=0;i<(int)cam.view.size();++i) {
 			//fprintf(stderr,"\r %i ms / frame, %i objects %f",frametime,psim.size(), psim.view[i].x);
 			circle(screen, cam.view[i].x, cam.view[i].y,cam.view[i].radius, g_red);
