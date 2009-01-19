@@ -12,6 +12,7 @@ void Cgravenv::work() {
     rplanets = *this;
     processcount = 0;
     maxProcesscount = 0;
+    pl_mutex = new mutex[(int)planets.size()];
 
     start();
 
@@ -35,6 +36,9 @@ void Cgravenv::work() {
     job_pipe.disable();
     stop();
     wait();
+
+    delete [ ] pl_mutex;
+
     {
 	int size=(int)planets.size();
 	for(int i=0;i<size;++i)
@@ -86,7 +90,7 @@ void Cgravenv::thread() {
     psig->signal();
     for(int i=0;i<(int)tforces.size();++i) {
 	{
-	    auto_mutex locker(pl_mutex);
+	    auto_mutex locker(pl_mutex[i]);
 	    (*this)[i].adjustSpeed(tforces[i]);
 	}
     }

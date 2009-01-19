@@ -55,18 +55,11 @@ class Cgravenv : 	private multithreaded_object,
 	    return p;
 	} 
 
-	int size() {
-	    pl_mutex.lock();
-	    int p = planets.size();
-	    pl_mutex.unlock();
-	    return p;
-	};
-
 	// Ccamera::Tview exportCoords();
     protected:	
 	dlib::pipe<Cgravenv::Job>::kernel_1a job_pipe;
 	mutex p_mutex;
-	mutex pl_mutex;
+	mutex *pl_mutex;
 	mutex np_mutex;
 	bool finished;
 	int processcount;
