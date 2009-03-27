@@ -43,7 +43,7 @@ int main(int argc, char ** argv) {
 	
 	bool BLeft=false,BRight=false;
 	bool BUp=false,BDown=false;
-	bool BPlus=false,BMinus=false;
+	bool Bi=false,Bo=false;
 	bool BE=false,BB=false;
 	bool BF=false;
 	double ftsquare=0;
@@ -136,11 +136,11 @@ int main(int argc, char ** argv) {
 						case SDLK_DOWN:
 							BDown=true;
 							break;
-						case SDLK_PLUS:
-							BPlus=true;
+						case SDLK_i:
+							Bi=true;
 							break;
-						case SDLK_MINUS:
-							BMinus=true;
+						case SDLK_o:
+							Bo=true;
 							break;
 						case SDLK_c:
 							cam.center();
@@ -176,11 +176,11 @@ int main(int argc, char ** argv) {
 						case SDLK_DOWN:
 							BDown=false;
 							break;
-						case SDLK_PLUS:
-							BPlus=false;
+						case SDLK_i:
+							Bi=false;
 							break;
-						case SDLK_MINUS:
-							BMinus=false;
+						case SDLK_o:
+							Bo=false;
 							break;
 						default:
 							break;
@@ -200,9 +200,9 @@ int main(int argc, char ** argv) {
 			cam.moveUp();
 		if(BDown)
 			cam.moveDown();
-		if(BPlus)
+		if(Bi)
 			cam.zoomIn();
-		if(BMinus)
+		if(Bo)
 			cam.zoomOut();
 		psim.work();
 		cam.work();
