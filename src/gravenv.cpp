@@ -16,13 +16,21 @@ void Cgravenv::work() {
 
     start();
 
-    for(int i=0;i<(int)planets.size();i++) { // calc forces
-	Job dummy;
-	dummy.i=i;
-	job_pipe.enqueue(dummy);
-	p_mutex.lock();
-	++maxProcesscount;
-	p_mutex.unlock();
+    { // delegate the jobs to the threads
+        int start = 0;
+        int end;
+        while(start<(int)planets.size()) {
+            end = start + (int)planets.size()/(CORECOUNT * CORECOUNT * CORECOUNT);
+            if(end > (int)planets.size()) end = (int)planets.size() - 1;
+
+            Job j(start,end);
+            job_pipe.enqueue(j);
+
+            start = end + 1;
+            p_mutex.lock();
+            ++maxProcesscount;
+            p_mutex.unlock();
+        }
     }
 
 
@@ -64,23 +72,24 @@ void Cgravenv::thread() {
 	tforces[i].fx=tforces[i].fy=0.0;
     while (job_pipe.dequeue(j) && should_stop() == false)
     {
-	for(int e=j.i+1,s=0;e<(int)rplanets.size();++e,s+=2)
-	    if(j.i!=e) {    		
-		double d = rplanets[j.i].dist(rplanets[e]);
-		if(d==0)++d;
-		double gravw = ( 1 / ( rplanets[j.i].getWeight() + rplanets[e].getWeight() ) ) * rplanets[e].getWeight();
-		double F = ( -GRAV * ( ( rplanets[j.i].getWeight() * rplanets[e].getWeight() ) / d ) );
-		double F1 = F * gravw;
-		double F2 = F * ( 1 - gravw);
-		double sina = rplanets[j.i].sy(rplanets[e]) / d;
-		double sina2 = -sina;
-		double cosa = rplanets[j.i].sx(rplanets[e]) / d;
-		double cosa2 = -cosa;
-		tforces[j.i].fx+=cosa * F1;
-		tforces[j.i].fy+=sina * F1;
-		tforces[e].fx+=cosa2 * F2;
-		tforces[e].fy+=sina2 * F2;
-	    }
+        for(int i = j.start;i<=j.end;++i)
+            for(int e=i+1,s=0;e<(int)rplanets.size();++e,s+=2)
+                if(i!=e) {    		
+                    double d = rplanets[i].dist(rplanets[e]);
+                    if(d==0)++d;
+                    double gravw = ( 1 / ( rplanets[i].getWeight() + rplanets[e].getWeight() ) ) * rplanets[e].getWeight();
+                    double F = ( -GRAV * ( ( rplanets[i].getWeight() * rplanets[e].getWeight() ) / d ) );
+                    double F1 = F * gravw;
+                    double F2 = F * ( 1 - gravw);
+                    double sina = rplanets[i].sy(rplanets[e]) / d;
+                    double sina2 = -sina;
+                    double cosa = rplanets[i].sx(rplanets[e]) / d;
+                    double cosa2 = -cosa;
+                    tforces[i].fx+=cosa * F1;
+                    tforces[i].fy+=sina * F1;
+                    tforces[e].fx+=cosa2 * F2;
+                    tforces[e].fy+=sina2 * F2;
+                }
 	{
 	    auto_mutex locker(p_mutex);
 	    ++processcount;

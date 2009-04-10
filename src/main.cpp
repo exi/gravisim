@@ -78,15 +78,17 @@ int main(int argc, char ** argv) {
 							(rand()%10000 - 50000)*1e7);
 	}*/
 	
-	/*for(int i=0;i<500;i++)
+	for(int i=0;i<800;i++)
 		psim.addPlanet(rand() % 1000000 - 500000,
 					rand() % 1000000 - 500000,
 					0,
 					0,
-					rand() % 200000 +1);*/
+					rand() % 200000 +1);
+        /*
 	psim.addPlanet(000,000,0,0,99999999);
 	psim.addPlanet(400,7000,30000,0,5000000);
 	psim.addPlanet(400,-6000,-30000,0,5000000);
+        */
 	
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{

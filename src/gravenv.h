@@ -26,10 +26,10 @@ class Cgravenv : 	private multithreaded_object,
 
     public:
 	struct Job{
-	    Job():i(0) {}
-	    Job(int i):i(i) {}
+	    Job():start(0),end(0) {}
+	    Job(int start, int end):start(start),end(end) {}
 
-	    int i;	
+            int start,end;
 	};
 
 	Cgravenv() : job_pipe(CORECOUNT*2),finished(0) {
