@@ -22,54 +22,56 @@ class Cgravenv : 	private multithreaded_object,
 {
 
     private:
-	Cplanets rplanets;
+        Cplanets rplanets;
 
     public:
-	struct Job{
-	    Job():start(0),end(0) {}
-	    Job(int start, int end):start(start),end(end) {}
+        struct Job{
+            Job():start(0),end(0) {}
+            Job(int start, int end):start(start),end(end) {}
 
             int start,end;
-	};
+        };
 
-	Cgravenv() : job_pipe(CORECOUNT*2),finished(0) {
-	    psig = new signaler(np_mutex);
-	    for(int i=0;i<CORECOUNT;i++) {
-		register_thread(*this,&Cgravenv::thread);
-		fprintf(stderr,"thread start \n");
-	    }
-	}
+        Cgravenv() : job_pipe(CORECOUNT*2),finished(0) {
+            psig = new signaler(np_mutex);
+            for(int i=0;i<CORECOUNT;i++) {
+                register_thread(*this,&Cgravenv::thread);
+                fprintf(stderr,"thread start \n");
+            }
+            start();
+        }
 
-	~Cgravenv () {
-	    stop();
-	    wait();
-	    delete psig;
-	}
+        ~Cgravenv () {
+            job_pipe.disable();
+            stop();
+            wait();
+            delete psig;
+        }
 
-	void work();
+        void work();
 
-	int getPCount() { 
-	    p_mutex.lock();
-	    int p = processcount;
-	    p_mutex.unlock();
-	    return p;
-	} 
+        int getPCount() { 
+            p_mutex.lock();
+            int p = processcount;
+            p_mutex.unlock();
+            return p;
+        } 
 
-	// Ccamera::Tview exportCoords();
+        // Ccamera::Tview exportCoords();
     protected:	
-	dlib::pipe<Cgravenv::Job>::kernel_1a job_pipe;
-	mutex p_mutex;
-	mutex *pl_mutex;
-	mutex np_mutex;
-	bool finished;
-	int processcount;
-	int maxProcesscount;
-	int corecount;
-	signaler *psig;
+        dlib::pipe<Cgravenv::Job>::kernel_1a job_pipe;
+        mutex p_mutex;
+        mutex *pl_mutex;
+        mutex np_mutex;
+        bool finished;
+        int processcount;
+        int maxProcesscount;
+        int corecount;
+        signaler *psig;
 
 
     private:
-	void thread ();
+        void thread ();
 
 };
 

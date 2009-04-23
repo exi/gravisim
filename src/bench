@@ -1,0 +1,14 @@
+pre, 800 objects, no optimization:
+5,2-5,6fps
+
+without the grav calc, 800 objects, no optimization:
+10-11fps
+
+with grav calc, 800 objects, no force applications:
+5,2fps (wtf?)
+
+standard, no collision checks, 800 objects:
+9-11fps
+
+standard, no movement, 800 objects:
+5fps

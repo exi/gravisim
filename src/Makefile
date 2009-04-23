@@ -5,9 +5,6 @@ all: grav
 camera.o:
 	g++ ${FLAGS} -Wall camera.cpp -c
 
-clusterbuild.o:
-	g++ ${FLAGS} -Wall clusterbuild.cpp -c
-
 gravenv.o:
 	g++ ${FLAGS} -Wall -D NO_MAKEFILE gravenv.cpp -c
 
