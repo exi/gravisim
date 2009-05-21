@@ -1,3 +1,8 @@
+#include <boost/function.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
+
 #include "gravenv.h"
 #include "force.h"
 #include "camera.h"
@@ -13,12 +18,13 @@
 
 void Cgravenv::work() {
 
+    DBG(fprintf(stderr,"->work \n"));
     rplanets = *this;
-    pl_mutex = new mutex[(int)planets.size()];
+    pl_mutex = new boost::mutex[(int)planets.size()];
     DBG(fprintf(stderr,"enabling pipe \n"));
     job_pipe.enable();
     processcount = 0;
-    maxProcesscount = 0;
+    int maxProcesscount = 0;
 
     //start();
 
@@ -26,7 +32,9 @@ void Cgravenv::work() {
         DBG(fprintf(stderr,"adding jobs \n"));
         int start=0,end;
         int packetsize = (int)((double)planets.size()+1.0)*((double)planets.size()/2.0);
+        DBG(fprintf(stderr,"packetsize\n"));
         packetsize = ceil(packetsize/CORECOUNT);
+        DBG(fprintf(stderr,"loop\n"));
 
         while(start<(int)planets.size()) {// calc forces
             end = start;
@@ -44,42 +52,43 @@ void Cgravenv::work() {
             Job j(start,end);
             job_pipe.enqueue(j);
             start = end + 1;
-            p_mutex.lock();
-            ++maxProcesscount;
-            p_mutex.unlock();
+            {
+                scoped_lock lock(p_mutex);
+                ++maxProcesscount;
+            }
         }
         DBG(fprintf(stderr,"jobs added \n"));
     }
+    DBG(fprintf(stderr,"out\n"));
 
-
-    if(getPCount()!=maxProcesscount)
-        while (getPCount()!=maxProcesscount) {	
-            psig->wait_or_timeout(10);
+    {
+        scoped_lock lock(p_mutex);
+        if(processcount!=maxProcesscount) {
+            while (processcount!=maxProcesscount) 
+                workcond.wait(lock);
         }
-
-    DBG(fprintf(stderr,"disabling pipe \n"));
-    //job_pipe.disable();
-
-    //stop();
-    //wait();
+    }
 
     delete [ ] pl_mutex;
 
     {
+        DBG(fprintf(stderr,"collisions\n"));
         int size=(int)planets.size();
-        for(int i=0;i<size;++i)
-            if(i<size) {
-                (*this)[i].vStep();
-                for(int e=i-1;e>=0;--e) {
-                    if( ((*this)[i].dist((*this)[e])) < (*this)[i].getRadius() + (*this)[e].getRadius() ){
-                        (*this)[i]+=(*this)[e];
-                        delPlanet(e);
-                        --size;
-                        --i;
+        if(size > 1)
+            for(int i=0;i<size;++i)
+                if(i<size) {
+                    (*this)[i].vStep();
+                    for(int e=i-1;e>=0;--e) {
+                        if( (*this)[i].dist((*this)[e]) < (*this)[i].getRadius() + (*this)[e].getRadius() ){
+                            (*this)[i]+=(*this)[e];
+                            delPlanet(e);
+                            --size;
+                            --i;
+                        }
                     }
                 }
-            }
     }
+    DBG(fprintf(stderr,"out\n"));
 }
 
 void Cgravenv::thread() {
@@ -87,7 +96,7 @@ void Cgravenv::thread() {
     DBG(fprintf(stderr,"\n thread start\n"));
 
     Job j;
-    while (job_pipe.dequeue(j) && !should_stop())
+    while (job_pipe.dequeue(j) && !stopThreads)
     {
         int offset = j.start;
         std::vector<Cforce> tforces((int)rplanets.size()-offset);
@@ -96,6 +105,7 @@ void Cgravenv::thread() {
         for(int i=j.start;i<=j.end;++i)
             for(int e=i+1;e<(int)rplanets.size();++e)
                 if(i!=e) {    		
+                    DBG(fprintf(stderr,"\n thread=> calc start\n"));
                     double d = rplanets[i].dist(rplanets[e]);
                     if(d==0)++d;
                     double gravw = ( 1 / ( rplanets[i].getWeight() + rplanets[e].getWeight() ) ) * rplanets[e].getWeight();
@@ -110,19 +120,22 @@ void Cgravenv::thread() {
                     tforces[i-offset].fy+=sina * F1;
                     tforces[e-offset].fx+=cosa2 * F2;
                     tforces[e-offset].fy+=sina2 * F2;
+                    DBG(fprintf(stderr,"\n thread=> calc end\n"));
                 }
         for(int i=0;i<(int)tforces.size();++i) {
-            {
-                auto_mutex locker(pl_mutex[i+offset]);
+                scoped_lock locker(pl_mutex[i+offset]);
                 (*this)[i+offset].adjustSpeed(tforces[i]);
-            }
         }
         {
-            auto_mutex locker(p_mutex);
+            scoped_lock locker(p_mutex);
             ++processcount;
-            psig->signal();
+            workcond.notify_all();
         }
     }
-
+    {
+        scoped_lock lock(stop_mutex);
+        --activeThreads;
+        stopcond.notify_all();
+    }
     DBG(fprintf(stderr,"\n thread stop\n"));
 }

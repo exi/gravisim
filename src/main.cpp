@@ -220,7 +220,7 @@ int main(int argc, char ** argv) {
                     rand() % 20000 - 10000,
                     rand() % 20000 - 10000,
                     rand() % 2000000 +1);
-        if(BB) {
+        if(BB && psim.size() > 1) {
             double x=(rand() % (int)(cam.xmax - cam.xmin) + cam.xmin);
             double y=(rand() % (int)(cam.ymax - cam.ymin) + cam.ymin);
             if(x==0) ++x;

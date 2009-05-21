@@ -5,24 +5,28 @@
 #define CORECOUNT 2
 #endif
 
-#include "dlib/threads.h"
-#include "dlib/misc_api.h"  // for dlib::sleep
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
+
 #include "dlib/pipe.h"
-#include "dlib/logger.h"
+#include "dlib/threads.h"
+#include "dlib/misc_api.h"
 #include "planets.h"
 #include "force.h"
 #include <vector>
 #include <list>
 #include <iostream>
 
-using namespace dlib;
-
-class Cgravenv : 	private multithreaded_object,
-    public Cplanets
+class Cgravenv : public Cplanets
 {
 
     private:
+        typedef boost::mutex::scoped_lock scoped_lock;
         Cplanets rplanets;
+        boost::thread* pThread;
 
     public:
         struct Job{
@@ -32,46 +36,43 @@ class Cgravenv : 	private multithreaded_object,
             int start,end;
         };
 
-        Cgravenv() : job_pipe(CORECOUNT*2),finished(0) {
-            psig = new signaler(np_mutex);
+        Cgravenv() : job_pipe(CORECOUNT*2),stopThreads(0) {
+            activeThreads=0;
             for(int i=0;i<CORECOUNT;i++) {
-                register_thread(*this,&Cgravenv::thread);
-                fprintf(stderr,"thread start \n");
+                pThread = new boost::thread(
+                        boost::bind( 
+                            &Cgravenv::thread,             // member function
+                            this ) );
             }
-            start();
         }
 
         ~Cgravenv () {
+            stopThreads = true;
             job_pipe.disable();
-            stop();
-            wait();
-            delete psig;
+            {
+                scoped_lock lock(stop_mutex);
+                if(activeThreads>0) {
+                    DBG(fprintf(stderr,"activeThreads:%d\n",activeThreads));
+                    while(activeThreads>0)
+                        stopcond.wait(lock);
+                }
+            }
         }
 
         void work();
 
-        int getPCount() { 
-            p_mutex.lock();
-            int p = processcount;
-            p_mutex.unlock();
-            return p;
-        } 
+        void thread();
 
-        // Ccamera::Tview exportCoords();
     protected:	
         dlib::pipe<Cgravenv::Job>::kernel_1a job_pipe;
-        mutex p_mutex;
-        mutex *pl_mutex;
-        mutex np_mutex;
-        bool finished;
+        boost::mutex p_mutex;
+        boost::mutex *pl_mutex;
+        boost::mutex stop_mutex;
+        boost::condition stopcond;
+        boost::condition workcond;
+        bool stopThreads;
         int processcount;
-        int maxProcesscount;
-        int corecount;
-        signaler *psig;
-
-
-    private:
-        void thread ();
+        int activeThreads;
 
 };
 

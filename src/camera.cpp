@@ -25,12 +25,13 @@ void Ccamera::transformCoords() {
         coords[i].setY(coords[i].getY() / scale);
     }
 
-    for(int i=0;i<(int)coords.size();i++) {
-        double gravw = ( 1 / ( coords[i].getWeight() + tweight ) ) * coords[i].getWeight();
-        tcollect.first = (tcollect.first * ( 1 - gravw ) + coords[i].getX() * gravw);
-        tcollect.second = (tcollect.second * ( 1 - gravw ) + coords[i].getY() * gravw);
-        tweight+=coords[i].getWeight();
-    }
+    if(mode==mauto)
+        for(int i=0;i<(int)coords.size();i++) {
+            double gravw = ( 1 / ( coords[i].getWeight() + tweight ) ) * coords[i].getWeight();
+            tcollect.first = (tcollect.first * ( 1 - gravw ) + coords[i].getX() * gravw);
+            tcollect.second = (tcollect.second * ( 1 - gravw ) + coords[i].getY() * gravw);
+            tweight+=coords[i].getWeight();
+        }
 
     if(mode==mauto) {
         targetx=tcollect.first*scale;

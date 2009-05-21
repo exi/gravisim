@@ -81,7 +81,7 @@ class Cplanet {
 
         Cplanet& operator+=(const Cplanet &p); //COLLISION!!!
         Tradius getRadius() { return (radius); }
-        const Tweight getWeight() const { return (weight); }
+        const Tweight getWeight() const { return (weight>0?weight:1); }
         const Tmcoord getVx() const { return (vx); }
         const Tmcoord getVy() const { return (vy); }
         double dist(Cplanet &planet) { return sqrt(sx(planet) * sx(planet) + sy(planet) * sy(planet)); };
