@@ -19,6 +19,12 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <stdio.h>
+
+#ifndef DEBUG
+#define DEBUG false
+#endif
+#define DBG(arg) if(DEBUG==true) arg
 
 class Cgravenv : public Cplanets
 {

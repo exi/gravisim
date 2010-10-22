@@ -1,0 +1,16 @@
+This app simulates a gravitational environment including the conservation of linear momentum.
+
+Just compile and run it:
+make
+./grav
+
+Keyboard shortcuts parameters:
+left/right/up/down-arrow: move inside the space
+i/o: zoom in and out
+e: toggle the random-object emitter
+f: toggle the frame limiter
+esc: stop the application
+
+cli parameter:
+-w <width> : set window width
+-h <height : set window height

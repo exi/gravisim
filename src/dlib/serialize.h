@@ -2,6 +2,7 @@
 // License: Boost Software License   See LICENSE.txt for the full license.
 #ifndef DLIB_SERIALIZe_
 #define DLIB_SERIALIZe_
+#include <stdio.h>
 
 /*!
     There are two global functions in the dlib namespace that provide 

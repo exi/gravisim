@@ -70,7 +70,6 @@ class Ccamera {
 
         void setWidth(int w) {
             width=w;
-            fprintf(stderr,"new width:%d \n",width);
         }
 
         void center() {

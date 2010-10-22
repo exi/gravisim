@@ -2,6 +2,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
+#include <stdio.h>
 
 #include "gravenv.h"
 #include "force.h"
@@ -10,7 +11,6 @@
 #include <list>
 #include <iostream>
 #define GRAV 6.67428
-
 #ifndef DEBUG
 #define DEBUG false
 #endif

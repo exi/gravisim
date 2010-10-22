@@ -1,4 +1,4 @@
-LIBS =  `sdl-config --libs` -lpthread -lboost_thread
+LIBS =  `sdl-config --libs` -lpthread -lboost_thread-mt
 FLAGS = `sdl-config --cflags` -D CORECOUNT=2 -O2 
 all: grav
 
